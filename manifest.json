@@ -380,7 +380,8 @@
                 "PutBucketNotificationConfiguration",
                 "PutObject",
                 "PutObjectAcl",
-                "UploadPart"
+                "UploadPart",
+                "UploadPartCopy"
             ]
         },
         "SecretsManager": {

@@ -49,6 +49,7 @@ use AsyncAws\S3\Input\PutBucketCorsRequest;
 use AsyncAws\S3\Input\PutBucketNotificationConfigurationRequest;
 use AsyncAws\S3\Input\PutObjectAclRequest;
 use AsyncAws\S3\Input\PutObjectRequest;
+use AsyncAws\S3\Input\UploadPartCopyRequest;
 use AsyncAws\S3\Input\UploadPartRequest;
 use AsyncAws\S3\Result\AbortMultipartUploadOutput;
 use AsyncAws\S3\Result\BucketExistsWaiter;
@@ -72,6 +73,7 @@ use AsyncAws\S3\Result\ObjectExistsWaiter;
 use AsyncAws\S3\Result\ObjectNotExistsWaiter;
 use AsyncAws\S3\Result\PutObjectAclOutput;
 use AsyncAws\S3\Result\PutObjectOutput;
+use AsyncAws\S3\Result\UploadPartCopyOutput;
 use AsyncAws\S3\Result\UploadPartOutput;
 use AsyncAws\S3\Signer\SignerV4ForS3;
 use AsyncAws\S3\ValueObject\AccessControlPolicy;
@@ -929,6 +931,46 @@ class S3Client extends AbstractApi
         $response = $this->getResponse($input->request(), new RequestContext(['operation' => 'UploadPart', 'region' => $input->getRegion()]));
 
         return new UploadPartOutput($response);
+    }
+
+    /**
+     * Uploads a part by copying data from an existing object as data source. You specify the data source by adding the
+     * request header `x-amz-copy-source` in your request and a byte range by adding the request header
+     * `x-amz-copy-source-range` in your request.
+     *
+     * @see http://docs.amazonwebservices.com/AmazonS3/latest/API/mpUploadUploadPartCopy.html
+     * @see https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPartCopy.html
+     * @see https://docs.aws.amazon.com/aws-sdk-php/v3/api/api-s3-2006-03-01.html#uploadpartcopy
+     *
+     * @param array{
+     *   Bucket: string,
+     *   CopySource: string,
+     *   CopySourceIfMatch?: string,
+     *   CopySourceIfModifiedSince?: \DateTimeImmutable|string,
+     *   CopySourceIfNoneMatch?: string,
+     *   CopySourceIfUnmodifiedSince?: \DateTimeImmutable|string,
+     *   CopySourceRange?: string,
+     *   Key: string,
+     *   PartNumber: int,
+     *   UploadId: string,
+     *   SSECustomerAlgorithm?: string,
+     *   SSECustomerKey?: string,
+     *   SSECustomerKeyMD5?: string,
+     *   CopySourceSSECustomerAlgorithm?: string,
+     *   CopySourceSSECustomerKey?: string,
+     *   CopySourceSSECustomerKeyMD5?: string,
+     *   RequestPayer?: RequestPayer::*,
+     *   ExpectedBucketOwner?: string,
+     *   ExpectedSourceBucketOwner?: string,
+     *   @region?: string,
+     * }|UploadPartCopyRequest $input
+     */
+    public function uploadPartCopy($input): UploadPartCopyOutput
+    {
+        $input = UploadPartCopyRequest::create($input);
+        $response = $this->getResponse($input->request(), new RequestContext(['operation' => 'UploadPartCopy', 'region' => $input->getRegion()]));
+
+        return new UploadPartCopyOutput($response);
     }
 
     protected function getAwsErrorFactory(): AwsErrorFactoryInterface

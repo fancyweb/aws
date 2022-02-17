@@ -28,6 +28,7 @@ use AsyncAws\S3\Input\PutBucketCorsRequest;
 use AsyncAws\S3\Input\PutBucketNotificationConfigurationRequest;
 use AsyncAws\S3\Input\PutObjectAclRequest;
 use AsyncAws\S3\Input\PutObjectRequest;
+use AsyncAws\S3\Input\UploadPartCopyRequest;
 use AsyncAws\S3\Input\UploadPartRequest;
 use AsyncAws\S3\Result\AbortMultipartUploadOutput;
 use AsyncAws\S3\Result\CompleteMultipartUploadOutput;
@@ -47,6 +48,7 @@ use AsyncAws\S3\Result\ListObjectsV2Output;
 use AsyncAws\S3\Result\ListPartsOutput;
 use AsyncAws\S3\Result\PutObjectAclOutput;
 use AsyncAws\S3\Result\PutObjectOutput;
+use AsyncAws\S3\Result\UploadPartCopyOutput;
 use AsyncAws\S3\Result\UploadPartOutput;
 use AsyncAws\S3\S3Client;
 use AsyncAws\S3\ValueObject\CORSConfiguration;
@@ -462,6 +464,25 @@ class S3ClientTest extends TestCase
         $result = $client->UploadPart($input);
 
         self::assertInstanceOf(UploadPartOutput::class, $result);
+        self::assertFalse($result->info()['resolved']);
+    }
+
+    public function testUploadPartCopy(): void
+    {
+        $client = new S3Client([], new NullProvider(), new MockHttpClient());
+
+        $input = new UploadPartCopyRequest([
+            'Bucket' => 'change me',
+            'CopySource' => 'change me',
+
+            'Key' => 'change me',
+            'PartNumber' => 1337,
+            'UploadId' => 'change me',
+
+        ]);
+        $result = $client->uploadPartCopy($input);
+
+        self::assertInstanceOf(UploadPartCopyOutput::class, $result);
         self::assertFalse($result->info()['resolved']);
     }
 }

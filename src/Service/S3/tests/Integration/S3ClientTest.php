@@ -31,6 +31,7 @@ use AsyncAws\S3\Input\PutBucketCorsRequest;
 use AsyncAws\S3\Input\PutBucketNotificationConfigurationRequest;
 use AsyncAws\S3\Input\PutObjectAclRequest;
 use AsyncAws\S3\Input\PutObjectRequest;
+use AsyncAws\S3\Input\UploadPartCopyRequest;
 use AsyncAws\S3\Input\UploadPartRequest;
 use AsyncAws\S3\Result\PutObjectOutput;
 use AsyncAws\S3\S3Client;
@@ -77,8 +78,8 @@ class S3ClientTest extends TestCase
         $input = new PutObjectRequest();
         $fileBody = 'foobar';
         $input->setBucket('foo')
-            ->setKey('bar')
-            ->setBody($fileBody);
+        ->setKey('bar')
+        ->setBody($fileBody);
         $result = $s3->putObject($input);
 
         $result->resolve();
@@ -88,7 +89,7 @@ class S3ClientTest extends TestCase
         // Test get object
         $input = new GetObjectRequest();
         $input->setBucket('foo')
-            ->setKey('bar');
+        ->setKey('bar');
         $result = $s3->getObject($input);
         $body = $result->getBody()->getContentAsString();
 
@@ -842,6 +843,45 @@ class S3ClientTest extends TestCase
         $result->resolve();
 
         self::assertEquals(200, $result->info()['status']);
+    }
+
+    public function testUploadPartCopy(): void
+    {
+        $client = $this->getClient();
+
+        $input = new UploadPartCopyRequest([
+            'Bucket' => 'change me',
+            'CopySource' => 'change me',
+            'CopySourceIfMatch' => 'change me',
+            'CopySourceIfModifiedSince' => new \DateTimeImmutable(),
+            'CopySourceIfNoneMatch' => 'change me',
+            'CopySourceIfUnmodifiedSince' => new \DateTimeImmutable(),
+            'CopySourceRange' => 'change me',
+            'Key' => 'change me',
+            'PartNumber' => 1337,
+            'UploadId' => 'change me',
+            'SSECustomerAlgorithm' => 'change me',
+            'SSECustomerKey' => 'change me',
+            'SSECustomerKeyMD5' => 'change me',
+            'CopySourceSSECustomerAlgorithm' => 'change me',
+            'CopySourceSSECustomerKey' => 'change me',
+            'CopySourceSSECustomerKeyMD5' => 'change me',
+            'RequestPayer' => 'change me',
+            'ExpectedBucketOwner' => 'change me',
+            'ExpectedSourceBucketOwner' => 'change me',
+        ]);
+        $result = $client->uploadPartCopy($input);
+
+        $result->resolve();
+
+        self::assertSame('changeIt', $result->getCopySourceVersionId());
+        // self::assertTODO(expected, $result->getCopyPartResult());
+        self::assertSame('changeIt', $result->getServerSideEncryption());
+        self::assertSame('changeIt', $result->getSSECustomerAlgorithm());
+        self::assertSame('changeIt', $result->getSSECustomerKeyMD5());
+        self::assertSame('changeIt', $result->getSSEKMSKeyId());
+        self::assertFalse($result->getBucketKeyEnabled());
+        self::assertSame('changeIt', $result->getRequestCharged());
     }
 
     private function getClient(): S3Client
